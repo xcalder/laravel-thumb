@@ -44,7 +44,7 @@ class Thumbnail
     
     public function url(){
         if(!File::isFile(Storage::disk($this->disk)->path($this->path))){
-            return asset('images/logo.png');
+            return asset('128x128.ico');
         }
         
         $this->getFileInfo();
@@ -65,7 +65,7 @@ class Thumbnail
             
             $img->save(Storage::disk($this->disk)->path($this->fileInfo['cacheFile']), 70);
         } catch (Exception $e) {
-            return asset('images/logo.png');
+            return asset('128x128.ico');
         }
         
         return Storage::disk($this->disk)->url($this->fileInfo['cacheFile']);
