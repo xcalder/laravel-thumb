@@ -2,7 +2,6 @@
 
 namespace Thumbnail;
 
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 use Intervention\Image\Facades\Image;
@@ -49,7 +48,7 @@ class Thumbnail
         
         $this->getFileInfo();
         
-        if(File::isFile($this->fileInfo['cacheFilePath'])){
+        if(File::isFile($this->fileInfo['cacheFilePath']) && $this->fileInfo['cacheLastModified'] >= $this->fileInfo['oldLastModified']){
             return Storage::disk($this->disk)->url($this->fileInfo['cacheFile']);
         }
         
@@ -78,6 +77,7 @@ class Thumbnail
     public function getFileInfo(){
         $filePath = Storage::disk($this->disk)->path($this->path);
         
+        $oldLastModified    = File::lastModified($filePath);//原文件最后修改时间
         $name               = File::name($filePath);//文件名
         $extension          = File::extension($filePath);//扩展名
         $fileDir            = File::dirname($this->path);//文件路径
@@ -85,14 +85,22 @@ class Thumbnail
                                 . (empty($this->height) ? '' : '-'.$this->height)
                                 . '.'.$extension;
         
-        $cacheDir          = 'cache/'.$fileDir;
+        $cacheDir           = 'cache/'.$fileDir;
+        $cacheFilePath      = Storage::disk($this->disk)->path($cacheDir . '/'.$cacheName);
+        
+        $cacheLastModified = 0;
+        if(File::isFile($cacheFilePath)){
+            $cacheLastModified = File::lastModified($cacheFilePath);
+        }
         
         $this->fileInfo = [
-            'fileDir' => $fileDir,
-            'cacheDir' => 'cache/'.$fileDir,
-            'cacheName' => $cacheName,
-            'cacheFile' => $cacheDir . '/'.$cacheName,
-            'cacheFilePath' => Storage::disk($this->disk)->path($cacheDir . '/'.$cacheName)
+            'fileDir'               => $fileDir,
+            'cacheDir'              => 'cache/'.$fileDir,
+            'cacheName'             => $cacheName,
+            'cacheFile'             => $cacheDir . '/'.$cacheName,
+            'cacheFilePath'         => $cacheFilePath,
+            'oldLastModified'       => $oldLastModified,
+            'cacheLastModified'     => $cacheLastModified
         ];
     }
 }
