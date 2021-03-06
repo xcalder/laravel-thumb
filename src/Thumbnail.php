@@ -43,7 +43,7 @@ class Thumbnail
     
     public function url(){
         if(!File::isFile(Storage::disk($this->disk)->path($this->path))){
-            return asset('128x128.ico');
+            return asset(config('laravel-thumbnail.default_img'));
         }
         
         $this->getFileInfo();
@@ -64,7 +64,7 @@ class Thumbnail
             
             $img->save(Storage::disk($this->disk)->path($this->fileInfo['cacheFile']), 70);
         } catch (Exception $e) {
-            return asset('128x128.ico');
+            return asset(config('laravel-thumbnail.default_img'));
         }
         
         return Storage::disk($this->disk)->url($this->fileInfo['cacheFile']);

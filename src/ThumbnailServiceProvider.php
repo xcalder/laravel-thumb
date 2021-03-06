@@ -16,6 +16,11 @@ class ThumbnailServiceProvider extends ServiceProvider
         $this->app->bind(Thumbnail::class, function () {
             return new Thumbnail();
         });
+        
+        $this->mergeConfigFrom(
+            __DIR__ . '/../config/laravel-thumbnail.php',
+            'laravel-thumbnail'
+        );
     }
 
     /**
@@ -25,6 +30,8 @@ class ThumbnailServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        
+        $this->publishes([
+            __DIR__ . '/../config/laravel-thumbnail.php' => config_path('laravel-thumbnail.php'),
+        ], 'config');
     }
 }
